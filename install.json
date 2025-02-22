@@ -529,4 +529,61 @@
       STEP 11: UPDATE SHELL STARTUP FILE
     */
     {
-      "actio
+      "action": "change_directory",
+      "path": ".."
+    },
+    {
+      "action": "print",
+      "message": "Appending environment variables and aliases to your shell startup..."
+    },
+    {
+      "action": "conditional",
+      "condition": { "eq": ["{{os_type}}", "windows"] },
+      "if_true": [
+        {
+          "action": "execute",
+          "command": "echo \"# RFdiffusion settings\" >> %USERPROFILE%\\Documents\\WindowsPowerShell\\Microsoft.PowerShell_profile.ps1"
+        },
+        {
+          "action": "execute",
+          "command": "echo \"$Env:RFDIFFUSION_DATA = '%CD%\\\\data'\" >> %USERPROFILE%\\Documents\\WindowsPowerShell\\Microsoft.PowerShell_profile.ps1"
+        },
+        {
+          "action": "execute",
+          "command": "echo \"function rfdiff { conda activate RFdiffusion_env; cd %CD% }\" >> %USERPROFILE%\\Documents\\WindowsPowerShell\\Microsoft.PowerShell_profile.ps1"
+        }
+      ],
+      "if_false": [
+        {
+          "action": "execute",
+          "command": "if [ -f ~/.zshrc ]; then echo 'export RFDIFFUSION_DATA=$(pwd)/data' >> ~/.zshrc; else echo 'export RFDIFFUSION_DATA=$(pwd)/data' >> ~/.bashrc; fi"
+        },
+        {
+          "action": "execute",
+          "command": "if [ -f ~/.zshrc ]; then echo 'alias rfdiff=\"conda activate RFdiffusion_env && cd $(pwd)\"' >> ~/.zshrc; else echo 'alias rfdiff=\"conda activate RFdiffusion_env && cd $(pwd)\"' >> ~/.bashrc; fi"
+        }
+      ]
+    },
+
+    /*
+      STEP 12: WRAP-UP
+    */
+    {
+      "action": "print",
+      "message": "------------------------------------------------------------"
+    },
+    {
+      "action": "print",
+      "message": "RFdiffusion installation complete!\nConda environment: RFdiffusion_env\nRepository folder: ./RFdiffusion\nModels folder: ./RFdiffusion/models\nShell startup updated."
+    },
+    {
+      "action": "print",
+      "message": "To run a quick monomer design:\n\n  conda activate RFdiffusion_env\n  cd RFdiffusion\n  python scripts/run_inference.py 'contigmap.contigs=[150-150]' \\\n      inference.output_prefix=./output_monomer \\\n      inference.num_designs=1\n"
+    },
+    {
+      "action": "print",
+      "message": "Enjoy cross-platform, GPU-optimized protein design with RFdiffusion!"
+    }
+  ]
+}
+
