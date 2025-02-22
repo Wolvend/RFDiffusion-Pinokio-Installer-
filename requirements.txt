@@ -1,0 +1,5 @@
+numpy
+pandas
+scipy
+biopython
+# Add additional packages required by RFdiffusion or your custom workflow.
