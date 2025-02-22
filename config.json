@@ -1,0 +1,13 @@
+
+---
+
+### 3. config.json
+
+```json
+{
+  "project_name": "RFdiffusion",
+  "default_output_dir": "outputs",
+  "num_designs": 5,
+  "use_gpu": true,
+  "notes": "This is a sample configuration file downloaded by the Pinkio installer. Customize as needed."
+}
