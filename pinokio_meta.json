@@ -1,5 +1,5 @@
 {
   "name": "RFdiffusion Pinkio Installer",
   "version": "1.0",
-  "description": "One-click Pinkio-based app for installing RFdiffusion with HPC optional script."
+  "description": "A one-click installer for setting up RFdiffusion using Pinokio."
 }
