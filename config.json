@@ -1,9 +1,3 @@
-
----
-
-### 3. config.json
-
-```json
 {
   "project_name": "RFdiffusion",
   "default_output_dir": "outputs",
