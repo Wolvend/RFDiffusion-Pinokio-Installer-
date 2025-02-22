@@ -1,20 +1,16 @@
 {
   "script": [
-    /*
-      STEP 0: INTRO
-    */
+    /* STEP 0: INTRO */
     {
       "action": "print",
-      "message": "Welcome to the Ultimate RFdiffusion Installer (Install Button)!"
+      "message": "Welcome to the Ultimate RFdiffusion Installer (Install Phase)!"
     },
     {
       "action": "print",
-      "message": "We will detect your OS/GPU, create a conda env, clone RFdiffusion, download model weights, and more."
+      "message": "We will detect your OS/GPU, create a conda environment, clone RFdiffusion, download model weights, and more."
     },
 
-    /*
-      STEP 1: DETECT OPERATING SYSTEM
-    */
+    /* STEP 1: DETECT OPERATING SYSTEM */
     {
       "action": "execute",
       "command": "uname",
@@ -49,21 +45,17 @@
       "message": "Detected Operating System => {{os_type}}"
     },
 
-    /*
-      STEP 2: CHECK FOR CONDA
-    */
+    /* STEP 2: CHECK FOR CONDA */
     {
       "action": "check_command",
       "command": "conda",
       "on_fail": {
         "action": "print",
-        "message": "Error: Conda not found. Please install Miniconda/Anaconda, then re-run."
+        "message": "Error: Conda not found. Please install Miniconda or Anaconda, then re-run this installer."
       }
     },
 
-    /*
-      STEP 3: DETECT GPU (NVIDIA, AMD, INTEL, or CPU)
-    */
+    /* STEP 3: DETECT GPU (NVIDIA, AMD, INTEL, or CPU) */
     {
       "action": "execute",
       "command": "nvidia-smi",
@@ -126,16 +118,14 @@
       "message": "Detected GPU => {{gpu_type}}"
     },
 
-    /*
-      STEP 4: CREATE/UPDATE CONDA ENV
-    */
+    /* STEP 4: CREATE/UPDATE CONDA ENVIRONMENT */
     {
       "action": "conditional",
       "condition": { "eq": ["{{gpu_type}}", "nvidia"] },
       "if_true": [
         {
           "action": "print",
-          "message": "Using NVIDIA GPU => Installing PyTorch w/ CUDA 11.7"
+          "message": "Using NVIDIA GPU => Installing PyTorch with CUDA 11.7."
         },
         {
           "action": "execute",
@@ -154,10 +144,7 @@
             {
               "action": "execute",
               "command": "conda create -n RFdiffusion_env python=3.9 pytorch torchvision torchaudio pytorch-rocm -c pytorch -y",
-              "on_fail": {
-                "action": "print",
-                "message": "ROCm installation failed; fallback to CPU if necessary."
-              }
+              "on_fail": { "action": "print", "message": "ROCm installation failed; falling back to CPU installation." }
             }
           ],
           "if_false": [
@@ -167,21 +154,18 @@
               "if_true": [
                 {
                   "action": "print",
-                  "message": "Using Intel GPU => Installing Intel-Extension-for-PyTorch"
+                  "message": "Using Intel GPU => Installing Intel-optimized PyTorch."
                 },
                 {
                   "action": "execute",
                   "command": "conda create -n RFdiffusion_env python=3.9 pytorch==2.0.0 intel-openmp intel-extension-for-pytorch -c intel -c pytorch -y",
-                  "on_fail": {
-                    "action": "print",
-                    "message": "Intel GPU installation failed; fallback to CPU if needed."
-                  }
+                  "on_fail": { "action": "print", "message": "Intel GPU installation failed; falling back to CPU installation." }
                 }
               ],
               "if_false": [
                 {
                   "action": "print",
-                  "message": "No GPU => Installing CPU-only PyTorch"
+                  "message": "No GPU detected. Installing CPU-only PyTorch."
                 },
                 {
                   "action": "execute",
@@ -194,9 +178,7 @@
       ]
     },
 
-    /*
-      STEP 5: CLONE/UPDATE RFDIFFUSION
-    */
+    /* STEP 5: CLONE OR UPDATE RFdiffusion REPOSITORY */
     {
       "action": "conditional",
       "condition": { "check_directory_exists": "RFdiffusion" },
@@ -209,10 +191,7 @@
         {
           "action": "execute",
           "command": "git pull --rebase",
-          "on_fail": {
-            "action": "print",
-            "message": "Git pull failed, continuing with local copy."
-          }
+          "on_fail": { "action": "print", "message": "Git pull failed; continuing with current version." }
         }
       ],
       "if_false": [
@@ -228,9 +207,7 @@
       ]
     },
 
-    /*
-      STEP 6: INSTALL DEPENDENCIES
-    */
+    /* STEP 6: INSTALL DEPENDENCIES */
     {
       "action": "print",
       "message": "Checking for environment.yml..."
@@ -239,34 +216,16 @@
       "action": "conditional",
       "condition": { "check_file_exists": "environment.yml" },
       "if_true": [
-        {
-          "action": "print",
-          "message": "Found environment.yml => Updating environment..."
-        },
-        {
-          "action": "execute",
-          "command": "conda env update -n RFdiffusion_env -f environment.yml"
-        }
+        { "action": "print", "message": "Found environment.yml. Updating environment..." },
+        { "action": "execute", "command": "conda env update -n RFdiffusion_env -f environment.yml" }
       ],
       "if_false": [
-        {
-          "action": "print",
-          "message": "No environment.yml => Installing dependencies from requirements.txt..."
-        },
-        {
-          "action": "execute",
-          "command": "conda run -n RFdiffusion_env pip install -r requirements.txt",
-          "on_fail": {
-            "action": "print",
-            "message": "Failed to install from requirements.txt; check your file or network."
-          }
-        }
+        { "action": "print", "message": "No environment.yml found. Installing dependencies from requirements.txt..." },
+        { "action": "execute", "command": "conda run -n RFdiffusion_env pip install -r requirements.txt" }
       ]
     },
 
-    /*
-      STEP 7: CREATE MODELS DIRECTORY & DOWNLOAD MODEL WEIGHTS
-    */
+    /* STEP 7: CREATE MODELS DIRECTORY & DOWNLOAD MODEL WEIGHTS */
     {
       "action": "print",
       "message": "Preparing to download model weights..."
@@ -275,20 +234,13 @@
       "action": "conditional",
       "condition": { "eq": ["{{os_type}}", "windows"] },
       "if_true": [
-        {
-          "action": "execute",
-          "command": "if not exist models mkdir models"
-        }
+        { "action": "execute", "command": "if not exist models mkdir models" }
       ],
       "if_false": [
-        {
-          "action": "execute",
-          "command": "mkdir -p models"
-        }
+        { "action": "execute", "command": "mkdir -p models" }
       ]
     },
     { "action": "change_directory", "path": "models" },
-
     {
       "action": "set_variable",
       "name": "checksum_Base_ckpt",
@@ -299,8 +251,6 @@
       "name": "checksum_Complex_base_ckpt",
       "value": "2222222222222222fake2222222222222222222222222222222222222222"
     },
-
-    /* Example parallel downloads for 2 files with checksums */
     {
       "action": "parallel",
       "actions": [
@@ -309,14 +259,9 @@
           "script": [
             {
               "action": "conditional",
-              "condition": {
-                "not": { "check_file_exists": "Base_ckpt.pt" }
-              },
+              "condition": { "not": { "check_file_exists": "Base_ckpt.pt" } },
               "if_true": [
-                {
-                  "action": "print",
-                  "message": "Base_ckpt.pt not found; starting download..."
-                },
+                { "action": "print", "message": "Downloading Base_ckpt.pt..." },
                 {
                   "action": "download",
                   "url": "http://files.ipd.uw.edu/pub/RFdiffusion/6f5902ac237024bdd0c176cb93063dc4/Base_ckpt.pt",
@@ -336,14 +281,9 @@
             },
             {
               "action": "conditional",
-              "condition": {
-                "neq": ["{{actual_checksum_base.output}}", "{{checksum_Base_ckpt}}"]
-              },
+              "condition": { "neq": ["{{actual_checksum_base.output}}", "{{checksum_Base_ckpt}}"] },
               "if_true": [
-                {
-                  "action": "print",
-                  "message": "Base_ckpt.pt checksum mismatch => re-downloading..."
-                },
+                { "action": "print", "message": "Base_ckpt.pt checksum mismatch; re-downloading..." },
                 {
                   "action": "download",
                   "url": "http://mirror.example.com/rfdiffusion/Base_ckpt.pt",
@@ -358,14 +298,9 @@
           "script": [
             {
               "action": "conditional",
-              "condition": {
-                "not": { "check_file_exists": "Complex_base_ckpt.pt" }
-              },
+              "condition": { "not": { "check_file_exists": "Complex_base_ckpt.pt" } },
               "if_true": [
-                {
-                  "action": "print",
-                  "message": "Complex_base_ckpt.pt not found; starting download..."
-                },
+                { "action": "print", "message": "Downloading Complex_base_ckpt.pt..." },
                 {
                   "action": "download",
                   "url": "http://files.ipd.uw.edu/pub/RFdiffusion/e29311f6f1bf1af907f9ef9f44b8328b/Complex_base_ckpt.pt",
@@ -385,14 +320,9 @@
             },
             {
               "action": "conditional",
-              "condition": {
-                "neq": ["{{actual_checksum_complex.output}}", "{{checksum_Complex_base_ckpt}}"]
-              },
+              "condition": { "neq": ["{{actual_checksum_complex.output}}", "{{checksum_Complex_base_ckpt}}"] },
               "if_true": [
-                {
-                  "action": "print",
-                  "message": "Complex_base_ckpt.pt checksum mismatch => re-downloading..."
-                },
+                { "action": "print", "message": "Complex_base_ckpt.pt checksum mismatch; re-downloading..." },
                 {
                   "action": "download",
                   "url": "http://mirror.example.com/rfdiffusion/Complex_base_ckpt.pt",
@@ -404,8 +334,6 @@
         }
       ]
     },
-
-    /* Sequentially download the rest */
     {
       "action": "download",
       "url": "http://files.ipd.uw.edu/pub/RFdiffusion/60f09a193fb5e5ccdc4980417708dbab/Complex_Fold_base_ckpt.pt",
@@ -432,30 +360,18 @@
       "destination": "Base_epoch8_ckpt.pt"
     },
 
-    /*
-      STEP 8: OPTIONAL HPC SLURM SCRIPT (Linux only)
-    */
+    /* STEP 8: OPTIONAL HPC SLURM SCRIPT (Linux only) */
     {
       "action": "conditional",
       "condition": { "eq": ["{{os_type}}", "linux"] },
       "if_true": [
-        {
-          "action": "print",
-          "message": "Checking if user has SLURM installed (for HPC script)."
-        },
-        {
-          "action": "check_command",
-          "command": "sbatch",
-          "store_result": "slurm_check"
-        },
+        { "action": "print", "message": "Checking if SLURM is installed..." },
+        { "action": "check_command", "command": "sbatch", "store_result": "slurm_check" },
         {
           "action": "conditional",
           "condition": { "eq": ["{{slurm_check.success}}", "true"] },
           "if_true": [
-            {
-              "action": "print",
-              "message": "SLURM found! Generating HPC job script (slurm_rfdiffusion.sh)."
-            },
+            { "action": "print", "message": "SLURM detected. Generating slurm_rfdiffusion.sh." },
             {
               "action": "write_file",
               "path": "../slurm_rfdiffusion.sh",
@@ -463,18 +379,13 @@
             }
           ],
           "if_false": [
-            {
-              "action": "print",
-              "message": "SLURM not found; skipping HPC script creation."
-            }
+            { "action": "print", "message": "SLURM not found; skipping HPC script creation." }
           ]
         }
       ]
     },
 
-    /*
-      STEP 9: RESOURCE AUTO-TUNING (Memory Check)
-    */
+    /* STEP 9: RESOURCE AUTO-TUNING (Memory Check) */
     {
       "action": "conditional",
       "condition": { "eq": ["{{os_type}}", "windows"] },
@@ -502,12 +413,10 @@
       ]
     },
 
-    /*
-      STEP 10: DOWNLOAD ADDITIONAL GITHUB FILES (config.json, helper_script.sh, etc.)
-    */
+    /* STEP 10: DOWNLOAD ADDITIONAL GITHUB FILES */
     {
       "action": "print",
-      "message": "Downloading additional files (e.g., config.json, helper_script.sh) from GitHub..."
+      "message": "Downloading additional files from GitHub (config.json, helper_script.sh, etc.)..."
     },
     {
       "action": "download",
@@ -525,9 +434,7 @@
       "destination": "helper_script.sh"
     },
 
-    /*
-      STEP 11: UPDATE SHELL STARTUP FILE
-    */
+    /* STEP 11: UPDATE SHELL STARTUP FILE */
     {
       "action": "change_directory",
       "path": ".."
@@ -565,20 +472,18 @@
       ]
     },
 
-    /*
-      STEP 12: WRAP-UP
-    */
+    /* STEP 12: WRAP-UP */
     {
       "action": "print",
       "message": "------------------------------------------------------------"
     },
     {
       "action": "print",
-      "message": "RFdiffusion installation complete!\nConda environment: RFdiffusion_env\nRepository folder: ./RFdiffusion\nModels folder: ./RFdiffusion/models\nShell startup updated."
+      "message": "RFdiffusion installation complete!\nConda Environment: RFdiffusion_env\nRepository: ./RFdiffusion\nModels: ./RFdiffusion/models\nShell startup updated."
     },
     {
       "action": "print",
-      "message": "To run a quick monomer design:\n\n  conda activate RFdiffusion_env\n  cd RFdiffusion\n  python scripts/run_inference.py 'contigmap.contigs=[150-150]' \\\n      inference.output_prefix=./output_monomer \\\n      inference.num_designs=1\n"
+      "message": "Test by running:\nconda activate RFdiffusion_env && cd RFdiffusion && python scripts/run_inference.py 'contigmap.contigs=[150-150]' \\"
     },
     {
       "action": "print",
@@ -586,4 +491,3 @@
     }
   ]
 }
-
